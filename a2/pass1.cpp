@@ -1,4 +1,5 @@
 #include <bits/stdc++.h>
+
 using namespace std;
 
 vector<string> MOT = {"STOP", "ADD", "SUB", "MULT", "MOVER", "MOVEM", "COMP", "BC", "DIV", "READ", "PRINT", "STORE", "LOAD"};
@@ -17,7 +18,13 @@ struct literal
     int address;
 };
 
+struct symbol
+{
+    char sym_name[10];
+    int address;
+};
 vector<struct literal> lit_table = {};
+vector<struct symbol> sym_table = {};
 
 struct keyword checkKeyWord(char word[])
 {
@@ -45,24 +52,50 @@ int checkNum(char word[])
     }
     return 1;
 }
+int checkDuplicateLiteral(char word[])
+{
+    for (int i = 0; i < lit_table.size(); i++)
+    {
+        if (strcmp(lit_table[i].lit_name, word) == 0)
+            return 1;
+    }
 
+    return 0;
+}
+int checkDuplicateSymbol(char word[])
+{
+    for (int i = 0; i < sym_table.size(); i++)
+    {
+        if (strcmp(sym_table[i].sym_name, word) == 0)
+            return 1;
+    }
+
+    return 0;
+}
 int checkSymbolLiteral(char word[])
 {
     if (word[0] == '=' && word[1] == '\'')
     {
         struct literal lit;
+        if (checkDuplicateLiteral(word))
+            return 1;
         strcpy(lit.lit_name, word);
         lit_table.push_back(lit);
         return 1;
     }
     else if (checkNum(word))
     {
-        cout << word << "\n";
+        // cout << word << "\n";
         return 2;
     }
     else
     {
-        cout << "symbol\n";
+        struct symbol sym;
+        if (checkDuplicateSymbol(word))
+            return 3;
+        strcpy(sym.sym_name, word);
+        sym_table.push_back(sym);
+        // cout << "symbol\n";
         return 3;
     }
 }
@@ -71,6 +104,7 @@ int main()
 {
     fstream fp;
     string line;
+    bool isDl = false;
     char line1[20];
     char delim[10] = " ,\t\n";
     struct keyword key = {-1, -1};
@@ -78,13 +112,20 @@ int main()
     while (fp)
     {
         getline(fp, line);
+        isDl = false;
         strcpy(line1, line.c_str());
         char *token = strtok(line1, delim);
         while (token)
         {
             key = checkKeyWord(token);
             if (key.word_type == -1)
-                cout << checkSymbolLiteral(token) << "\n";
+                if (checkSymbolLiteral(token) == 2)
+                {
+                    //update symbol table address
+                    // increment LC by this number
+                }
+            if (key.word_type == 3)
+                isDl = true;
             cout << token << "\t";
             cout << " " << key.word_type << " " << key.index << "\n";
             token = strtok(NULL, delim);
@@ -93,6 +134,10 @@ int main()
     for (int i = 0; i < lit_table.size(); i++)
     {
         cout << lit_table[i].lit_name << "\n";
+    }
+    for (int i = 0; i < sym_table.size(); i++)
+    {
+        cout << sym_table[i].sym_name << "\n";
     }
     return 0;
 }
