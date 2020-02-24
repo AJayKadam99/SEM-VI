@@ -57,7 +57,7 @@ int checkOpr(string s)
 	for (int i = 0; i < OPR.size(); i++)
 	{
 		if (s.compare(OPR[i]) == 0)
-			return 1;
+			return 2;
 	}
 	return 0;
 }
@@ -81,7 +81,7 @@ vector<string> checkTrm(vector<string> words)
 		for (int j = 0; j < word.length(); j++)
 		{
 			// cout << word[j] << "\n";
-			if (checkSym(word[j]))
+			/*if (checkSym(word[j]))
 			{
 				opr = word[j] + word[j + 1];
 				if (checkOpr(opr))
@@ -95,7 +95,7 @@ vector<string> checkTrm(vector<string> words)
 					words.insert(words.begin() + i, str);
 					words[i].erase(j, 1);
 				}
-			}
+			}*/
 		}
 	}
 	return words;
@@ -107,50 +107,74 @@ int main()
 	vector<string> words;
 	string file1;
 	string line;
+	string word;
 	char str[20];
 	char c;
 	char *token;
-	while (fp1)
-	{
-		getline(fp1, line);
-		TRM.push_back(line);
-	}
-	// for (int i = 0; i < TRM.size(); i++)
-	// 	cout << TRM[i] << " " << strlen(TRM[i].c_str()) << "\n";
+	
 	fp1.close();
 	fp1.open("input.cpp");
-	fp2.open("temp.cpp", ios::out);
+	
 	while (fp1)
 	{
 		getline(fp1, line);
-		//		cout << " " << line;
-		fp2 << line << "\n";
+		file1.append(line);
+		
 	}
+	
 	fp1.close();
 	fp2.close();
-	fp2.open("temp.cpp");
-	while (fp2)
-	{
-		fp2 >> line;
-		//cout << line << "\n";
-		words.push_back(line);
+	
+	for (int i = 0; i <file1.length(); i++){
+		if(file1[i]=='\n' || file1[i]=='\t' || file1[i]==' ')
+			file1.erase(i,1);
 	}
-	// words = checkOprAndTrm(words);
-	// for (int i = 0; i < words.size(); i++)
-	// {
-	// 	cout << words[i] << "\n";
-	// }
-	words = checkTrm(words);
-	for (int i = 0; i < words.size(); i++)
-	{
-		cout << words[i] << "\n";
+	for (int i = 0; i <file1.length(); i++){
+		if(file1[i]=='\n' || file1[i]=='\t' || file1[i]==' ')
+			file1.erase(i,1);
 	}
-	/*fp2.clear();
-	fp2.seekg(0, ios::beg);
-	while (fp2)
+	for (int i = 0; i <file1.length(); i++)
 	{
-		fp2 >> c;
-		cout << c << " " << checkTrm(c) << " trm\n";
-	}*/
+		int k=0, j=0;
+		k = checkSym(file1[i]);
+		if(k==1){
+			
+			line.erase();
+			line.append(file1, i, 2);
+			//cout<<line<<"\n";
+			j = checkOpr(line);
+			words.push_back(word);
+			word.erase();
+			if(j==2){
+				words.push_back(line);
+				word.erase();
+			}
+			if(j==0){
+				word.append(file1, i,1);
+				words.push_back(word);
+				word.erase();
+			}
+		}
+		else{
+			word.append(file1, i, 1);
+		}
+		cout << file1[i] <<" "<<k<< " "<<j<<"\n";
+		
+	}
+	words.push_back(word);
+	for (int i = 0; i < words.size(); i++){
+		int k = checkSym(words[i][0]);
+		int j = checkOpr(words[i]);
+		if(j==2)
+			cout<<words[i]<<" is a terminal symbol\n";
+		else if(k==1)
+			cout<<words[i]<<" is a operator symbol\n";
+		else{
+		cout<<words[i]<<" is a terminal\n";
+		}
+		
+	}
+	
+	
 	return 0;
 }
