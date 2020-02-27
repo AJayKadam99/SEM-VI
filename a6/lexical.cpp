@@ -1,6 +1,13 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+struct UST
+{
+	int index;
+	string classname;
+	string symbol;
+};
+
 vector<string> TRM = {"include", "stdio.h", "void", "int", "for", "if", "printf", "getch"};
 vector<char> SYM = {
 	'#',
@@ -15,33 +22,19 @@ vector<char> SYM = {
 	'+',
 	'*',
 	'-',
-	'\''};
+	'\'',
+	'}',
+	' '};
 vector<string> OPR = {
 	"<=",
 	"++",
 	"=="};
 
-// vector<string> checkOprAndTrm(vector<string> words)
-// {
-// 	string word, opr, trm;
-// 	for (auto i = words.begin(); i != words.end(); i++)
-// 		for (auto j = OPR.begin(); j != OPR.end(); j++)
-// 		{
-// 			word = *i;
-// 			opr = *j;
-// 			if (strcmp(word.c_str(), opr.c_str()) == 0)
-// 				words.erase(i);
-// 		}
-// 	for (auto i = words.begin(); i != words.end(); i++)
-// 		for (auto k = TRM.begin(); k != TRM.end(); k++)
-// 		{
-// 			word = *i;
-// 			trm = *k;
-// 			if (strcmp(word.c_str(), trm.c_str()) == 0)
-// 				words.erase(i);
-// 		}
-// 	return words;
-// }
+vector<string> LITERALS = {};
+vector<string> SYMBOLS = {};
+vector<string> TERMINALS = {};
+vector<string> KEYWORDS = {};
+vector<struct UST> Universal = {};
 
 int checkSym(char c)
 {
@@ -61,120 +54,239 @@ int checkOpr(string s)
 	}
 	return 0;
 }
-vector<string> checkTrm(vector<string> words)
+int checkKey(string s)
 {
-	string word, opr, opr1;
-	for (int i = 0; i < words.size(); i++)
+	for (int i = 0; i < TRM.size(); i++)
 	{
-		word = words[i];
-		// for (auto j = OPR.begin(); j != OPR.end(); j++)
-		// {
-		// 	opr = *j;
-		// 	if (strcmp(word.c_str(), opr.c_str()) == 0)
-		// 	{
-		// 		cout << word << " is a Operator\n";
-		// 		words.erase(i);
-		// 		k = 1;
-		// 		break;
-		// 	}
-		// }
-		for (int j = 0; j < word.length(); j++)
-		{
-			// cout << word[j] << "\n";
-			/*if (checkSym(word[j]))
-			{
-				opr = word[j] + word[j + 1];
-				if (checkOpr(opr))
-				{
-					words[i].erase(j, 2);
-					words.insert(words.begin() + i, opr);
-				}
-				else
-				{
-					string str(1, word[j]);
-					words.insert(words.begin() + i, str);
-					words[i].erase(j, 1);
-				}
-			}*/
-		}
+		if (s.compare(TRM[i]) == 0)
+			return 3;
 	}
-	return words;
+	return 0;
+}
+int checkDigits(string s)
+{
+	for (int i = 0; i < s.length(); i++)
+	{
+		if (isdigit(s[i]) != 0)
+			return 1;
+	}
+	return 0;
+}
+int checkTerminals(string s)
+{
+	for (int i = 0; i < TERMINALS.size(); i++)
+	{
+		if (s.compare(TERMINALS[i]) == 0)
+			return i;
+	}
+	return -1;
+}
+int checkKeywords(string s)
+{
+	for (int i = 0; i < KEYWORDS.size(); i++)
+	{
+		if (s.compare(KEYWORDS[i]) == 0)
+			return i;
+	}
+	return -1;
+}
+int checkLiterals(string s)
+{
+	for (int i = 0; i < LITERALS.size(); i++)
+	{
+		if (s.compare(LITERALS[i]) == 0)
+			return i;
+	}
+	return -1;
+}
+int checkSymbols(string s)
+{
+	for (int i = 0; i < SYMBOLS.size(); i++)
+	{
+		if (s.compare(SYMBOLS[i]) == 0)
+			return i;
+	}
+	return -1;
 }
 int main()
 {
 	fstream fp1, fp2;
 	fp1.open("TRM.txt");
 	vector<string> words;
+	struct UST ustsymbol;
 	string file1;
 	string line;
 	string word;
 	char str[20];
 	char c;
 	char *token;
-	
+
 	fp1.close();
 	fp1.open("input.cpp");
-	
+
 	while (fp1)
 	{
 		getline(fp1, line);
 		file1.append(line);
-		
 	}
-	
+
 	fp1.close();
 	fp2.close();
-	
-	for (int i = 0; i <file1.length(); i++){
-		if(file1[i]=='\n' || file1[i]=='\t' || file1[i]==' ')
-			file1.erase(i,1);
-	}
-	for (int i = 0; i <file1.length(); i++){
-		if(file1[i]=='\n' || file1[i]=='\t' || file1[i]==' ')
-			file1.erase(i,1);
-	}
-	for (int i = 0; i <file1.length(); i++)
+
+	for (int i = 0; i < file1.length(); i++)
 	{
-		int k=0, j=0;
+		if (file1[i] == '\n' || file1[i] == '\t')
+			file1.erase(i, 1);
+	}
+	for (int i = 0; i < file1.length(); i++)
+	{
+		int k = 0, j = 0;
 		k = checkSym(file1[i]);
-		if(k==1){
-			
+		if (k == 1)
+		{
+
 			line.erase();
 			line.append(file1, i, 2);
-			//cout<<line<<"\n";
 			j = checkOpr(line);
 			words.push_back(word);
 			word.erase();
-			if(j==2){
+			if (j == 2)
+			{
 				words.push_back(line);
 				word.erase();
+				i++;
 			}
-			if(j==0){
-				word.append(file1, i,1);
+			if (j == 0)
+			{
+				word.append(file1, i, 1);
 				words.push_back(word);
 				word.erase();
 			}
 		}
-		else{
+		else
+		{
 			word.append(file1, i, 1);
 		}
-		cout << file1[i] <<" "<<k<< " "<<j<<"\n";
-		
 	}
 	words.push_back(word);
-	for (int i = 0; i < words.size(); i++){
+	for (int i = 0; i < words.size(); i++)
+	{
+		if (words[i].compare("\n") == 0 || words[i].compare("\t") == 0 || words[i].compare(" ") == 0 || words[i].compare("") == 0)
+			words.erase(words.begin() + i);
+	}
+	for (int i = 0; i < words.size(); i++)
+	{
+		if (words[i].compare("\n") == 0 || words[i].compare("\t") == 0 || words[i].compare(" ") == 0 || words[i].compare("") == 0)
+			words.erase(words.begin() + i);
+	}
+	for (int i = 0; i < words.size(); i++)
+	{
+		words[i].erase(0, words[i].find_first_not_of("\t\n\v\f\r "));
+	}
+
+	for (int i = 0; i < words.size(); i++)
+	{
 		int k = checkSym(words[i][0]);
 		int j = checkOpr(words[i]);
-		if(j==2)
-			cout<<words[i]<<" is a terminal symbol\n";
-		else if(k==1)
-			cout<<words[i]<<" is a operator symbol\n";
-		else{
-		cout<<words[i]<<" is a terminal\n";
+		int z = checkKey(words[i]);
+		k = max(k, j);
+		k = max(k, z);
+
+		switch (k)
+		{
+		case 0:
+		{
+			if (checkDigits(words[i]) != 0)
+			{
+				z = checkLiterals(words[i]);
+				if (z == -1)
+				{
+					LITERALS.push_back(words[i]);
+					z = LITERALS.size() - 1;
+				}
+				ustsymbol.index = z;
+				ustsymbol.symbol = words[i];
+				ustsymbol.classname = "LIT";
+			}
+			else
+			{
+				z = checkSymbols(words[i]);
+				if (z == -1)
+				{
+					SYMBOLS.push_back(words[i]);
+					z = SYMBOLS.size() - 1;
+				}
+				ustsymbol.index = z;
+				ustsymbol.symbol = words[i];
+				ustsymbol.classname = "SYM";
+			}
+			Universal.push_back(ustsymbol);
+			break;
 		}
-		
+		case 1:
+		{
+			z = checkTerminals(words[i]);
+			if (z == -1)
+			{
+				TERMINALS.push_back(words[i]);
+				z = TERMINALS.size() - 1;
+			}
+			ustsymbol.index = z;
+			ustsymbol.symbol = words[i];
+			ustsymbol.classname = "TRM";
+			Universal.push_back(ustsymbol);
+			break;
+		}
+		case 2:
+		{
+			z = checkTerminals(words[i]);
+			if (z == -1)
+			{
+				TERMINALS.push_back(words[i]);
+				z = TERMINALS.size() - 1;
+			}
+			ustsymbol.index = z;
+			ustsymbol.symbol = words[i];
+			ustsymbol.classname = "TRM";
+			Universal.push_back(ustsymbol);
+			break;
+		}
+		case 3:
+		{
+			z = checkTerminals(words[i]);
+			if (z == -1)
+			{
+				TERMINALS.push_back(words[i]);
+				z = TERMINALS.size() - 1;
+			}
+			ustsymbol.index = z;
+			ustsymbol.symbol = words[i];
+			ustsymbol.classname = "TRM";
+			Universal.push_back(ustsymbol);
+			break;
+		}
+		}
 	}
-	
-	
+	cout << "SYMBOLS\n";
+	for (int i = 0; i < SYMBOLS.size(); i++)
+	{
+		cout << i << "\t" << SYMBOLS[i] << "\n";
+	}
+	cout << "\nLITERALS\n";
+	for (int i = 0; i < LITERALS.size(); i++)
+	{
+		cout << i << "\t" << LITERALS[i] << "\n";
+	}
+	cout << "\nTERMINALS\n";
+	for (int i = 0; i < TERMINALS.size(); i++)
+	{
+		cout << i << "\t" << TERMINALS[i] << "\n";
+	}
+
+	cout << "\nUNIVERSAL SYMBOL TABLE\n";
+	for (int i = 0; i < Universal.size(); i++)
+	{
+		cout << i << "\t" << Universal[i].index << "\t" << Universal[i].classname << "\t" << Universal[i].symbol << "\n";
+	}
 	return 0;
 }
